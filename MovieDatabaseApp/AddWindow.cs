@@ -17,8 +17,8 @@ namespace MovieDatabaseApp
         private int _seasons;
         private int _episodes;
         private int _completed;
-        private int _curS;
-        private int _curE;
+        private string _curS = "NULL";
+        private string _curE = "NULL";
         private decimal _rating;
 
         private Form prevForm;
@@ -49,12 +49,12 @@ namespace MovieDatabaseApp
 
         private void num_CurrentS_ValueChanged(object sender, EventArgs e)
         {
-            _curS = (int)num_CurrentS.Value;
+            _curS = num_CurrentS.Value.ToString();
         }
 
         private void num_CurrentEp_ValueChanged(object sender, EventArgs e)
         {
-            _curE = (int)num_CurrentEp.Value;
+            _curE = num_CurrentEp.Value.ToString();
         }
 
         private void num_Rating_ValueChanged(object sender, EventArgs e)
@@ -97,8 +97,8 @@ namespace MovieDatabaseApp
                 _completed = 1;
             else
                 _completed = 0;
-            _curS = (int)num_CurrentS.Value;
-            _curE = (int)num_CurrentEp.Value;
+            _curS = num_CurrentS.Value.ToString();
+            _curE = num_CurrentEp.Value.ToString();
             _rating = num_Rating.Value;
 
             if (txt_Name.Text != "")

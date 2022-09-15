@@ -14,6 +14,7 @@ namespace MovieDatabaseApp
     public partial class Form1 : Form
     {
         private string cmdString = "SELECT * FROM shows ORDER BY Name ASC";
+        private bool alphabetical = true;
 
         public override bool Focused => base.Focused;
 
@@ -39,7 +40,7 @@ namespace MovieDatabaseApp
             }
             catch (Exception ex)
             {
-                ConsoleText.Text = "Can not open connection ! ";
+                ConsoleText.Text = ex.Message;
             }
         }
 
@@ -53,8 +54,47 @@ namespace MovieDatabaseApp
             MovieList.Items.Clear();
 
             MovieList.Items.Add(header);
+
+            bool first = true;
+            int currentLetter = 65;
+            decimal currentRating = 5;
             while (reader.Read())
             {
+                if (alphabetical)
+                {
+                    if (reader.GetString(0)[0] < 65 || reader.GetString(0)[0] > 122 || reader.GetString(0)[0] > 90 && reader.GetString(0)[0] < 97)
+                    {
+                        MovieList.Items.Add("#");
+                    }
+                    else
+                    {
+                        if (reader.GetString(0)[0] != currentLetter)
+                        {
+                            currentLetter = reader.GetString(0)[0];
+                            first = true;
+                        }
+
+                        if (first && currentLetter == reader.GetString(0)[0] || first && currentLetter + 32 == reader.GetString(0)[0])
+                        {
+                            MovieList.Items.Add(reader.GetString(0)[0]);
+                            first = false;
+                        }
+                    }
+                }
+                else
+                {
+                    if(reader.GetDecimal(6) != currentRating)
+                    {
+                        currentRating = reader.GetDecimal(6);
+                        first = true;
+                    }
+                    if(first && reader.GetDecimal(6) == currentRating)
+                    {
+                        MovieList.Items.Add(reader.GetDecimal(6));
+                        first = false;
+                    }
+                }
+
                 MovieList.Items.Add(getFullItem(reader));
             }
         }
@@ -73,13 +113,16 @@ namespace MovieDatabaseApp
 
             if (!_reader.IsDBNull(1))
                 item += "\t"+ _reader.GetInt16(1).ToString().PadLeft(12);      //season total
-            item += "\t\t" + _reader.GetInt16(2).ToString().PadLeft(12);         //episodes total
+            if(_reader.GetInt16(2).ToString().Length < 4)
+                item += "\t\t" + _reader.GetInt16(2).ToString().PadLeft(12);         //episodes total
+            else
+                item += "\t\t" + _reader.GetInt16(2).ToString().PadLeft(12);
             item += "\t\t" + _reader.GetBoolean(3).ToString().PadLeft(8);       //finished
-            if (!_reader.IsDBNull(4) || _reader.GetInt16(4) == 0)
+            if (!_reader.IsDBNull(4))
                 item += "\t\t" + _reader.GetInt16(4).ToString().PadLeft(10);     //season current
             else
                 item += "\t\t-".PadLeft(10);
-            if (!_reader.IsDBNull(5) || _reader.GetInt16(5) == 0)
+            if (!_reader.IsDBNull(5))
                 item += "\t\t" + _reader.GetInt16(5).ToString().PadLeft(10);     //episode current
             else
                 item += "\t\t-".PadLeft(10);
@@ -91,14 +134,14 @@ namespace MovieDatabaseApp
         private void AZradio_CheckedChanged(object sender, EventArgs e)
         {
             cmdString = "SELECT * FROM shows ORDER BY Name ASC";
-
+            alphabetical = true;
             connect_db();
         }
 
         private void Ratingradio_CheckedChanged(object sender, EventArgs e)
         {
             cmdString = "SELECT * FROM shows ORDER BY Rating DESC";
-
+            alphabetical = false;
             connect_db();
         }
 
